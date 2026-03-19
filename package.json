@@ -1,0 +1,32 @@
+{
+  "name": "dito-empty-local-test",
+  "version": "1.0.0",
+  "description": "A minimal production-ready HTML, CSS, and JavaScript project",
+  "main": "src/js/index.js",
+  "scripts": {
+    "start": "npx serve -s .",
+    "dev": "npx live-server --port=3000 --open=.",
+    "lint:js": "eslint src/js/**/*.js",
+    "lint:css": "stylelint src/css/**/*.css",
+    "format": "prettier --write \"**/*.{html,css,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{html,css,js,json,md}\""
+  },
+  "keywords": [
+    "html",
+    "css",
+    "javascript",
+    "vanilla-js",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "stylelint": "^15.11.0",
+    "stylelint-config-standard": "^34.0.0",
+    "live-server": "^1.2.2",
+    "serve": "^14.2.1"
+  }
+}
