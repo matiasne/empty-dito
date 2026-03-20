@@ -2,21 +2,42 @@
  * Main application entry point
  */
 
+import { initAccountForm } from './components/accountForm.js';
+import { initAccountList } from './components/accountList.js';
+
 /**
  * Initialize the application
  */
-function init() {
-  console.log('Application initialized');
+async function init() {
+  console.log('Bank Account Management System initialized');
+
+  // Initialize account creation form
+  initAccountForm();
+
+  // Initialize account list
+  await initAccountList();
+
+  // Setup event listeners
   setupEventListeners();
+
+  // Animate sections on load
   animateOnLoad();
+
+  console.log('Application ready');
 }
 
 /**
  * Set up event listeners
- * Placeholder for future event listeners
  */
 function setupEventListeners() {
-  // Event listeners will be added here as needed
+  // Listen for custom events
+  document.addEventListener('accountCreated', async () => {
+    console.log('Account created event received');
+    // Refresh account list when a new account is created
+    const { refreshAccountList } = await import('./components/accountList.js');
+    await refreshAccountList();
+  });
+
   console.log('Event listeners ready');
 }
 

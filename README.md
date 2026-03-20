@@ -1,6 +1,21 @@
-# dito empty local test
+# Bank Account Management System
 
-A minimal, production-ready boilerplate project built with HTML, CSS, and vanilla JavaScript.
+A comprehensive bank account creation and management system built with HTML, CSS, and vanilla JavaScript.
+
+## 🎯 Current Features
+
+### ✅ Account Creation Feature (IMPLEMENTED)
+
+Complete account management system with:
+
+- **Account Creation**: Create new bank accounts with comprehensive validation
+- **Multiple Account Types**: Checking, Savings, Business, Money Market
+- **Data Validation**: Real-time field validation and business rules enforcement
+- **Audit Trail**: Complete activity logging for compliance
+- **Account Management**: View, search, and manage all accounts
+- **Persistent Storage**: LocalStorage-based database simulation
+
+See [QUICKSTART.md](QUICKSTART.md) for a quick guide or [docs/ACCOUNT_CREATION_FEATURE.md](docs/ACCOUNT_CREATION_FEATURE.md) for detailed documentation.
 
 ## Features
 
@@ -18,16 +33,34 @@ A minimal, production-ready boilerplate project built with HTML, CSS, and vanill
 .
 ├── src/
 │   ├── css/
-│   │   ├── main.css
-│   │   ├── variables.css
-│   │   └── reset.css
+│   │   ├── main.css           # Main application styles
+│   │   ├── variables.css      # CSS custom properties
+│   │   ├── reset.css          # CSS reset
+│   │   └── account.css        # Account management styles
 │   ├── js/
-│   │   ├── index.js
-│   │   └── utils.js
+│   │   ├── index.js           # Application entry point
+│   │   ├── utils.js           # General utilities
+│   │   ├── components/
+│   │   │   ├── accountForm.js    # Account creation form
+│   │   │   └── accountList.js    # Account list & audit viewer
+│   │   ├── services/
+│   │   │   ├── accountService.js # Account business logic
+│   │   │   └── auditService.js   # Audit trail service
+│   │   ├── database/
+│   │   │   └── accountDatabase.js # Data persistence layer
+│   │   ├── validators/
+│   │   │   └── accountValidator.js # Input validation
+│   │   ├── utils/
+│   │   │   └── accountUtils.js    # Account utilities
+│   │   └── tests/
+│   │       └── accountServiceTest.js # Test suite
 │   └── assets/
 │       └── images/
+├── docs/
+│   └── ACCOUNT_CREATION_FEATURE.md  # Feature documentation
 ├── index.html
 ├── package.json
+├── QUICKSTART.md          # Quick start guide
 ├── .eslintrc.json
 ├── .stylelintrc.json
 ├── .prettierrc
