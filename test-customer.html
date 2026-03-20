@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button.danger {
+            background: #e74c3c;
+        }
+        button.danger:hover {
+            background: #c0392b;
+        }
+        button.success {
+            background: #27ae60;
+        }
+        button.success:hover {
+            background: #229954;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        #console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #3498db;
+            padding-left: 10px;
+        }
+        .log-success {
+            border-left-color: #27ae60;
+            color: #a5d6a7;
+        }
+        .log-error {
+            border-left-color: #e74c3c;
+            color: #ef9a9a;
+        }
+        .log-info {
+            border-left-color: #3498db;
+            color: #90caf9;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Customer Management Test Page</h1>
+        <p class="subtitle">Test the customer management functionality</p>
+
+        <div class="section">
+            <h2>📝 Customer Operations</h2>
+            <button onclick="testCreateCustomer()">Create Test Customer</button>
+            <button onclick="testGetAllCustomers()">Get All Customers</button>
+            <button onclick="testSearchCustomers()">Search Customers</button>
+            <button onclick="testUpdateCustomer()">Update Customer</button>
+            <button class="danger" onclick="testDeleteCustomer()">Delete Customer (Soft)</button>
+        </div>
+
+        <div class="section">
+            <h2>💳 Credit Score Operations</h2>
+            <button onclick="testGetCreditScore()">Get Credit Score</button>
+            <button onclick="testRefreshCreditScore()">Refresh Credit Score</button>
+            <button onclick="testInterpretScore()">Interpret Score</button>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Test Suite</h2>
+            <button class="success" onclick="runAllTests()">Run All Tests</button>
+            <button onclick="clearConsole()">Clear Console</button>
+            <button onclick="clearAllData()" class="danger">Clear All Data</button>
+        </div>
+
+        <div id="console"></div>
+    </div>
+
+    <script type="module">
+        import { 
+            createCustomer, 
+            updateCustomer, 
+            deleteCustomer, 
+            getCustomer, 
+            getAllCustomers, 
+            searchCustomers,
+            refreshCreditScore,
+            CUSTOMER_STATUS 
+        } from './src/js/services/customerService.js';
+        
+        import { 
+            getCreditScore,
+            interpretCreditScore 
+        } from './src/js/services/creditAgencyInterface.js';
+        
+        import { runCustomerTests } from './src/js/tests/customerServiceTest.js';
+        import { clearAllCustomers } from './src/js/database/customerDatabase.js';
+        import { clearAuditLogs } from './src/js/services/auditService.js';
+
+        let lastCustomerId = null;
+
+        // Console logging
+        function log(message, type = 'info') {
+            const consoleEl = document.getElementById('console');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        window.log = log;
+
+        // Test functions
+        window.testCreateCustomer = async function() {
+            log('Creating test customer...', 'info');
+            const result = await createCustomer({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: `test${Date.now()}@example.com`,
+                phone: '5551234567',
+                dateOfBirth: '1990-01-15',
+                ssn: Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+                address: '123 Main Street',
+                city: 'Springfield',
+                state: 'IL',
+                zipCode: '62701'
+            });
+
+            if (result.success) {
+                lastCustomerId = result.customer.customerId;
+                log(`✓ Customer created: ${result.customer.customerId}`, 'success');
+                log(`  Credit Score: ${result.customer.creditScore || 'N/A'}`, 'info');
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testGetAllCustomers = async function() {
+            log('Getting all customers...', 'info');
+            const result = await getAllCustomers();
+            if (result.success) {
+                log(`✓ Found ${result.count} customers`, 'success');
+                result.customers.forEach(c => {
+                    log(`  - ${c.firstName} ${c.lastName} (${c.customerId})`, 'info');
+                });
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testSearchCustomers = async function() {
+            log('Searching customers by name "John"...', 'info');
+            const result = await searchCustomers({ name: 'John' });
+            if (result.success) {
+                log(`✓ Found ${result.count} matching customers`, 'success');
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testUpdateCustomer = async function() {
+            if (!lastCustomerId) {
+                log('⚠ No customer to update. Create one first.', 'error');
+                return;
+            }
+            log(`Updating customer ${lastCustomerId}...`, 'info');
+            const result = await updateCustomer(lastCustomerId, {
+                phone: '5559876543'
+            });
+            if (result.success) {
+                log(`✓ Customer updated successfully`, 'success');
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testDeleteCustomer = async function() {
+            if (!lastCustomerId) {
+                log('⚠ No customer to delete. Create one first.', 'error');
+                return;
+            }
+            log(`Soft deleting customer ${lastCustomerId}...`, 'info');
+            const result = await deleteCustomer(lastCustomerId, false);
+            if (result.success) {
+                log(`✓ Customer deactivated successfully`, 'success');
+                lastCustomerId = null;
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testGetCreditScore = async function() {
+            log('Getting credit score...', 'info');
+            const result = await getCreditScore({
+                ssn: '1234',
+                firstName: 'John',
+                lastName: 'Doe',
+                dateOfBirth: '1990-01-15'
+            });
+            if (result.success) {
+                log(`✓ Credit Score: ${result.creditScore}`, 'success');
+                log(`  Rating: ${result.creditReport.rating}`, 'info');
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testRefreshCreditScore = async function() {
+            if (!lastCustomerId) {
+                log('⚠ No customer to refresh. Create one first.', 'error');
+                return;
+            }
+            log(`Refreshing credit score for ${lastCustomerId}...`, 'info');
+            const result = await refreshCreditScore(lastCustomerId);
+            if (result.success) {
+                log(`✓ New Credit Score: ${result.creditScore}`, 'success');
+            } else {
+                log(`✗ Failed: ${result.error}`, 'error');
+            }
+        };
+
+        window.testInterpretScore = function() {
+            const score = 750;
+            log(`Interpreting credit score ${score}...`, 'info');
+            const result = interpretCreditScore(score);
+            log(`✓ Rating: ${result.rating}`, 'success');
+            log(`  ${result.description}`, 'info');
+            log(`  Lending Terms: ${result.lendingTerms}`, 'info');
+        };
+
+        window.runAllTests = async function() {
+            log('======================================', 'info');
+            log('Starting comprehensive test suite...', 'info');
+            log('======================================', 'info');
+            const result = await runCustomerTests();
+            log('======================================', 'info');
+            log(`Tests completed: ${result.passed}/${result.total} passed`, 
+                result.failed === 0 ? 'success' : 'error');
+            log('======================================', 'info');
+        };
+
+        window.clearConsole = function() {
+            document.getElementById('console').innerHTML = '';
+            log('Console cleared', 'info');
+        };
+
+        window.clearAllData = async function() {
+            if (confirm('Are you sure you want to clear all customer data and audit logs?')) {
+                await clearAllCustomers();
+                await clearAuditLogs();
+                lastCustomerId = null;
+                log('✓ All data cleared', 'success');
+            }
+        };
+
+        // Initial message
+        log('Customer Management Test Page loaded', 'success');
+        log('Click buttons above to test functionality', 'info');
+    </script>
+</body>
+</html>
