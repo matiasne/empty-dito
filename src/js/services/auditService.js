@@ -8,6 +8,7 @@
  * @param {Object} auditEntry - Audit entry to log
  * @param {string} auditEntry.action - Action performed
  * @param {string} auditEntry.accountNumber - Account number (optional)
+ * @param {string} auditEntry.customerId - Customer ID (optional)
  * @param {Object} auditEntry.details - Additional details
  * @param {string} auditEntry.timestamp - Timestamp of action
  * @returns {Promise<Object>} Log result
@@ -22,6 +23,7 @@ export async function logAudit(auditEntry) {
       id: generateAuditId(),
       action: auditEntry.action,
       accountNumber: auditEntry.accountNumber || null,
+      customerId: auditEntry.customerId || null,
       details: auditEntry.details || {},
       timestamp: auditEntry.timestamp || new Date().toISOString(),
       userAgent: navigator.userAgent,
@@ -52,16 +54,21 @@ export async function logAudit(auditEntry) {
 }
 
 /**
- * Get audit logs for an account
- * @param {string} accountNumber - Account number
+ * Get audit logs for an account or customer
+ * @param {string} accountNumber - Account number (optional)
+ * @param {string} customerId - Customer ID (optional)
  * @returns {Promise<Array>} Array of audit entries
  */
-export async function getAuditLogs(accountNumber) {
+export async function getAuditLogs(accountNumber, customerId) {
   try {
     const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
 
     if (accountNumber) {
       return auditLogs.filter((log) => log.accountNumber === accountNumber);
+    }
+
+    if (customerId) {
+      return auditLogs.filter((log) => log.customerId === customerId);
     }
 
     return auditLogs;
@@ -173,6 +180,8 @@ export async function getAuditStatistics() {
       },
     };
 
+    const customersAudited = new Set();
+
     auditLogs.forEach((log) => {
       // Count actions
       stats.actionCounts[log.action] = (stats.actionCounts[log.action] || 0) + 1;
@@ -180,6 +189,11 @@ export async function getAuditStatistics() {
       // Track accounts
       if (log.accountNumber) {
         stats.accountsAudited.add(log.accountNumber);
+      }
+
+      // Track customers
+      if (log.customerId) {
+        customersAudited.add(log.customerId);
       }
 
       // Track date range
@@ -193,6 +207,7 @@ export async function getAuditStatistics() {
     });
 
     stats.uniqueAccountsAudited = stats.accountsAudited.size;
+    stats.uniqueCustomersAudited = customersAudited.size;
     delete stats.accountsAudited; // Remove the Set object
 
     return stats;

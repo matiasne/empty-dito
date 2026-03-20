@@ -17,6 +17,21 @@ Complete account management system with:
 
 See [QUICKSTART.md](QUICKSTART.md) for a quick guide or [docs/ACCOUNT_CREATION_FEATURE.md](docs/ACCOUNT_CREATION_FEATURE.md) for detailed documentation.
 
+### ✅ Customer Management Feature (IMPLEMENTED)
+
+Comprehensive customer management system with:
+
+- **Customer CRUD Operations**: Create, update, delete, and query customers
+- **Credit Score Integration**: Automatic credit score retrieval from credit agency
+- **Data Validation**: Comprehensive validation including age verification (18+)
+- **Search & Filtering**: Multi-criteria search by name, email, phone, or ID
+- **Status Management**: Manage customer status (active, inactive, suspended, blocked)
+- **Audit Trail**: Complete logging of all customer operations
+- **Security Features**: SSN masking, sensitive data protection
+- **Business Rules**: Duplicate prevention, age verification, account safety checks
+
+See [docs/CUSTOMER_MANAGEMENT_FEATURE.md](docs/CUSTOMER_MANAGEMENT_FEATURE.md) for complete documentation or [CUSTOMER_MANAGEMENT_SUMMARY.md](CUSTOMER_MANAGEMENT_SUMMARY.md) for quick reference.
+
 ## Features
 
 - Clean and organized project structure
@@ -44,23 +59,31 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick guide or [docs/ACCOUNT_CREATION_F
 │   │   │   ├── accountForm.js    # Account creation form
 │   │   │   └── accountList.js    # Account list & audit viewer
 │   │   ├── services/
-│   │   │   ├── accountService.js # Account business logic
-│   │   │   └── auditService.js   # Audit trail service
+│   │   │   ├── accountService.js        # Account business logic
+│   │   │   ├── customerService.js       # Customer business logic
+│   │   │   ├── creditAgencyInterface.js # Credit score integration
+│   │   │   └── auditService.js          # Audit trail service
 │   │   ├── database/
-│   │   │   └── accountDatabase.js # Data persistence layer
+│   │   │   ├── accountDatabase.js   # Account data persistence
+│   │   │   └── customerDatabase.js  # Customer data persistence
 │   │   ├── validators/
-│   │   │   └── accountValidator.js # Input validation
+│   │   │   ├── accountValidator.js  # Account validation
+│   │   │   └── customerValidator.js # Customer validation
 │   │   ├── utils/
-│   │   │   └── accountUtils.js    # Account utilities
+│   │   │   ├── accountUtils.js      # Account utilities
+│   │   │   └── customerUtils.js     # Customer utilities
 │   │   └── tests/
-│   │       └── accountServiceTest.js # Test suite
+│   │       ├── accountServiceTest.js  # Account test suite
+│   │       └── customerServiceTest.js # Customer test suite
 │   └── assets/
 │       └── images/
 ├── docs/
-│   └── ACCOUNT_CREATION_FEATURE.md  # Feature documentation
+│   ├── ACCOUNT_CREATION_FEATURE.md  # Account feature docs
+│   └── CUSTOMER_MANAGEMENT_FEATURE.md # Customer feature docs
 ├── index.html
 ├── package.json
-├── QUICKSTART.md          # Quick start guide
+├── QUICKSTART.md                     # Quick start guide
+├── CUSTOMER_MANAGEMENT_SUMMARY.md   # Customer feature summary
 ├── .eslintrc.json
 ├── .stylelintrc.json
 ├── .prettierrc
