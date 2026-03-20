@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup Data Display Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .test-result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .pass {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .fail {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      h2 {
+        color: #333;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mockup Data Display Test Results</h1>
+
+    <h2>Test Summary</h2>
+    <div id="test-results"></div>
+
+    <h2>Detailed Tests</h2>
+
+    <script>
+      // Test function
+      function runTests() {
+        const tests = [];
+
+        // Open the main page in an iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = 'index.html';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        iframe.onload = function () {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+          // Test 1: Check if products section exists
+          const productsSection = iframeDoc.getElementById('products-section');
+          tests.push({
+            name: 'Products Section Exists',
+            passed: productsSection !== null,
+          });
+
+          // Test 2: Check if feature cards exist
+          const featureCards = iframeDoc.querySelectorAll('.feature-card');
+          tests.push({
+            name: 'Feature Cards Present',
+            passed: featureCards.length >= 3,
+            details: `Found ${featureCards.length} feature cards`,
+          });
+
+          // Test 3: Check if product prices are displayed
+          const productPrices = iframeDoc.querySelectorAll('.product-price');
+          tests.push({
+            name: 'Product Prices Displayed',
+            passed: productPrices.length > 0,
+            details: `Found ${productPrices.length} product prices`,
+          });
+
+          // Test 4: Check if statistics section exists
+          const statsSection = iframeDoc.getElementById('stats-section');
+          tests.push({
+            name: 'Statistics Section Exists',
+            passed: statsSection !== null,
+          });
+
+          // Test 5: Check if stat numbers are present
+          const statNumbers = iframeDoc.querySelectorAll('.stat-number');
+          tests.push({
+            name: 'Statistics Numbers Present',
+            passed: statNumbers.length >= 4,
+            details: `Found ${statNumbers.length} stat numbers`,
+          });
+
+          // Test 6: Check if activity feed exists
+          const activitySection = iframeDoc.getElementById('activity-section');
+          tests.push({
+            name: 'Activity Feed Section Exists',
+            passed: activitySection !== null,
+          });
+
+          // Test 7: Check if activity items are present
+          const activityItems = iframeDoc.querySelectorAll('.activity-item');
+          tests.push({
+            name: 'Activity Items Present',
+            passed: activityItems.length >= 4,
+            details: `Found ${activityItems.length} activity items`,
+          });
+
+          // Test 8: Check if team section exists
+          const teamSection = iframeDoc.getElementById('team-section');
+          tests.push({
+            name: 'Team Section Exists',
+            passed: teamSection !== null,
+          });
+
+          // Test 9: Check if team members are displayed
+          const teamMembers = iframeDoc.querySelectorAll('.team-member');
+          tests.push({
+            name: 'Team Members Displayed',
+            passed: teamMembers.length >= 4,
+            details: `Found ${teamMembers.length} team members`,
+          });
+
+          // Test 10: Check if testimonials section exists
+          const testimonialsSection = iframeDoc.getElementById('testimonials-section');
+          tests.push({
+            name: 'Testimonials Section Exists',
+            passed: testimonialsSection !== null,
+          });
+
+          // Test 11: Check if testimonials are present
+          const testimonials = iframeDoc.querySelectorAll('.testimonial');
+          tests.push({
+            name: 'Testimonials Present',
+            passed: testimonials.length >= 3,
+            details: `Found ${testimonials.length} testimonials`,
+          });
+
+          // Test 12: Check if demo button exists
+          const demoButton = iframeDoc.getElementById('demo-button');
+          tests.push({
+            name: 'Demo Button Exists',
+            passed: demoButton !== null,
+          });
+
+          // Test 13: Check if CSS is loaded
+          const mainCSS = iframeDoc.querySelector('link[href*="main.css"]');
+          tests.push({
+            name: 'Main CSS Loaded',
+            passed: mainCSS !== null,
+          });
+
+          // Test 14: Check if JavaScript is loaded
+          const mainJS = iframeDoc.querySelector('script[src*="index.js"]');
+          tests.push({
+            name: 'Main JavaScript Loaded',
+            passed: mainJS !== null,
+          });
+
+          // Display results
+          displayResults(tests);
+
+          // Clean up
+          document.body.removeChild(iframe);
+        };
+      }
+
+      function displayResults(tests) {
+        const resultsDiv = document.getElementById('test-results');
+        const passedTests = tests.filter((t) => t.passed).length;
+        const totalTests = tests.length;
+
+        // Summary
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = passedTests === totalTests ? 'test-result pass' : 'test-result fail';
+        summaryDiv.innerHTML = `<strong>Overall: ${passedTests}/${totalTests} tests passed</strong>`;
+        resultsDiv.appendChild(summaryDiv);
+
+        // Individual tests
+        tests.forEach((test) => {
+          const testDiv = document.createElement('div');
+          testDiv.className = test.passed ? 'test-result pass' : 'test-result fail';
+          testDiv.innerHTML = `
+                    <strong>${test.passed ? '✓' : '✗'} ${test.name}</strong>
+                    ${test.details ? `<br><small>${test.details}</small>` : ''}
+                `;
+          resultsDiv.appendChild(testDiv);
+        });
+      }
+
+      // Run tests when page loads
+      window.addEventListener('load', runTests);
+    </script>
+  </body>
+</html>
