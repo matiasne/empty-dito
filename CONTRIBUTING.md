@@ -34,6 +34,7 @@ Thank you for your interest in contributing! Here are some guidelines to help yo
 - Add more details in the body if necessary
 
 Example:
+
 ```
 Add user authentication feature
 

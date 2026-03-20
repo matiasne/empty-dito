@@ -21,7 +21,7 @@ export function getRandomMessage() {
     'Welcome to your new project!',
     'JavaScript is awesome!',
     'Keep coding!',
-    'You\'re doing great!',
+    "You're doing great!",
     'Build something amazing!',
     'Happy coding!',
     'The possibilities are endless!',

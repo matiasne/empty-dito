@@ -45,6 +45,7 @@ A minimal, production-ready boilerplate project built with HTML, CSS, and vanill
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -52,6 +53,7 @@ npm install
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -59,6 +61,7 @@ npm run dev
 The application will open in your browser at `http://localhost:3000`.
 
 Alternatively, you can use a simple static server:
+
 ```bash
 npm start
 ```
@@ -66,11 +69,13 @@ npm start
 ### Linting
 
 Run JavaScript linting:
+
 ```bash
 npm run lint:js
 ```
 
 Run CSS linting:
+
 ```bash
 npm run lint:css
 ```
@@ -78,11 +83,13 @@ npm run lint:css
 ### Formatting
 
 Format all files:
+
 ```bash
 npm run format
 ```
 
 Check if files are formatted correctly:
+
 ```bash
 npm run format:check
 ```
