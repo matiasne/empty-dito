@@ -1,7 +1,14 @@
 /**
  * Account Database
- * Simulates database operations using localStorage
+ * Database operations for accounts using the infrastructure layer
  */
+
+import { getDatabase } from '../infrastructure/database.js';
+import { Logger } from '../infrastructure/logger.js';
+import { getErrorHandler, ErrorType, createError } from '../infrastructure/errorHandler.js';
+
+const logger = new Logger('AccountDatabase');
+const errorHandler = getErrorHandler();
 
 /**
  * Save account to database
@@ -10,33 +17,33 @@
  */
 export async function saveAccount(account) {
   try {
-    // Get existing accounts
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-
+    logger.debug('Saving account', { accountNumber: account.accountNumber });
+    
+    const db = getDatabase();
+    
     // Check if account number already exists
-    const exists = accounts.some((acc) => acc.accountNumber === account.accountNumber);
-    if (exists) {
-      return {
-        success: false,
-        error: 'Account number already exists',
-      };
+    const exists = await db.query('accounts', (acc) => acc.accountNumber === account.accountNumber);
+    if (exists.length > 0) {
+      throw createError(
+        'Account number already exists',
+        ErrorType.CONFLICT,
+        'medium',
+        { accountNumber: account.accountNumber }
+      );
     }
 
-    // Add new account
-    accounts.push(account);
+    // Insert account using infrastructure layer
+    const result = await db.insert('accounts', account);
 
-    // Save to localStorage
-    localStorage.setItem('accounts', JSON.stringify(accounts));
+    logger.info('Account saved successfully', { accountNumber: account.accountNumber });
 
     return {
       success: true,
-      account,
+      account: result.data[0],
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to save account', error);
+    return errorHandler.handle(error, 'saveAccount');
   }
 }
 
@@ -47,14 +54,16 @@ export async function saveAccount(account) {
  */
 export async function accountExists(criteria) {
   try {
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-
-    const account = accounts.find((acc) => {
+    logger.debug('Checking account existence', criteria);
+    
+    const db = getDatabase();
+    const accounts = await db.query('accounts', (acc) => {
       return Object.keys(criteria).every((key) => acc[key] === criteria[key]);
     });
 
-    return account || null;
+    return accounts.length > 0 ? accounts[0] : null;
   } catch (error) {
+    logger.error('Failed to check account existence', error);
     return null;
   }
 }
@@ -66,10 +75,14 @@ export async function accountExists(criteria) {
  */
 export async function getAccountByNumber(accountNumber) {
   try {
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-    const account = accounts.find((acc) => acc.accountNumber === accountNumber);
-    return account || null;
+    logger.debug('Getting account by number', { accountNumber });
+    
+    const db = getDatabase();
+    const accounts = await db.query('accounts', (acc) => acc.accountNumber === accountNumber);
+    
+    return accounts.length > 0 ? accounts[0] : null;
   } catch (error) {
+    logger.error('Failed to get account', error);
     return null;
   }
 }
@@ -82,34 +95,31 @@ export async function getAccountByNumber(accountNumber) {
  */
 export async function updateAccount(accountNumber, updates) {
   try {
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-    const accountIndex = accounts.findIndex((acc) => acc.accountNumber === accountNumber);
+    logger.debug('Updating account', { accountNumber, updates });
+    
+    const db = getDatabase();
+    const result = await db.update(
+      'accounts',
+      (acc) => acc.accountNumber === accountNumber,
+      updates
+    );
 
-    if (accountIndex === -1) {
-      return {
-        success: false,
-        error: 'Account not found',
-      };
+    if (result.updated === 0) {
+      throw createError('Account not found', ErrorType.NOT_FOUND);
     }
 
-    // Update account
-    accounts[accountIndex] = {
-      ...accounts[accountIndex],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
+    logger.info('Account updated successfully', { accountNumber });
 
-    localStorage.setItem('accounts', JSON.stringify(accounts));
+    // Get updated account
+    const updatedAccount = await getAccountByNumber(accountNumber);
 
     return {
       success: true,
-      account: accounts[accountIndex],
+      account: updatedAccount,
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to update account', error);
+    return errorHandler.handle(error, 'updateAccount');
   }
 }
 
@@ -120,26 +130,24 @@ export async function updateAccount(accountNumber, updates) {
  */
 export async function deleteAccount(accountNumber) {
   try {
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-    const filteredAccounts = accounts.filter((acc) => acc.accountNumber !== accountNumber);
+    logger.debug('Deleting account', { accountNumber });
+    
+    const db = getDatabase();
+    const result = await db.delete('accounts', (acc) => acc.accountNumber === accountNumber);
 
-    if (accounts.length === filteredAccounts.length) {
-      return {
-        success: false,
-        error: 'Account not found',
-      };
+    if (result.deleted === 0) {
+      throw createError('Account not found', ErrorType.NOT_FOUND);
     }
 
-    localStorage.setItem('accounts', JSON.stringify(filteredAccounts));
+    logger.info('Account deleted successfully', { accountNumber });
 
     return {
       success: true,
+      deleted: result.deleted,
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to delete account', error);
+    return errorHandler.handle(error, 'deleteAccount');
   }
 }
 
@@ -149,9 +157,16 @@ export async function deleteAccount(accountNumber) {
  */
 export async function getAllAccounts() {
   try {
-    const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+    logger.debug('Getting all accounts');
+    
+    const db = getDatabase();
+    const accounts = await db.query('accounts');
+    
+    logger.debug(`Retrieved ${accounts.length} accounts`);
+    
     return accounts;
   } catch (error) {
+    logger.error('Failed to get all accounts', error);
     return [];
   }
 }
@@ -162,14 +177,18 @@ export async function getAllAccounts() {
  */
 export async function clearAllAccounts() {
   try {
-    localStorage.removeItem('accounts');
+    logger.warn('Clearing all accounts');
+    
+    const db = getDatabase();
+    await db.delete('accounts', () => true);
+    
+    logger.info('All accounts cleared');
+    
     return {
       success: true,
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to clear accounts', error);
+    return errorHandler.handle(error, 'clearAllAccounts');
   }
 }

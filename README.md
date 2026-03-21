@@ -15,7 +15,18 @@ Complete account management system with:
 - **Account Management**: View, search, and manage all accounts
 - **Persistent Storage**: LocalStorage-based database simulation
 
-See [QUICKSTART.md](QUICKSTART.md) for a quick guide or [docs/ACCOUNT_CREATION_FEATURE.md](docs/ACCOUNT_CREATION_FEATURE.md) for detailed documentation.
+### ✅ Infrastructure Layer (IMPLEMENTED)
+
+Production-ready infrastructure with:
+
+- **Database Access**: Connection pooling, query caching, retry logic, and transaction support
+- **Logging System**: Multi-level logging with persistence and filtering
+- **Time Service**: Centralized time management and formatting utilities
+- **Error Handling**: Comprehensive error handling with categorization and recovery
+- **Setup Scripts**: Database initialization, migrations, and health monitoring
+- **Resource Optimization**: Automatic connection pooling and query caching
+
+See [QUICKSTART.md](QUICKSTART.md) for a quick guide, [docs/ACCOUNT_CREATION_FEATURE.md](docs/ACCOUNT_CREATION_FEATURE.md) for account features, or [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) for infrastructure documentation.
 
 ## Features
 
@@ -52,12 +63,21 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick guide or [docs/ACCOUNT_CREATION_F
 │   │   │   └── accountValidator.js # Input validation
 │   │   ├── utils/
 │   │   │   └── accountUtils.js    # Account utilities
+│   │   ├── infrastructure/        # Infrastructure layer
+│   │   │   ├── database.js        # Database with pooling & caching
+│   │   │   ├── logger.js          # Centralized logging
+│   │   │   ├── timeService.js     # Time management
+│   │   │   ├── errorHandler.js    # Error handling
+│   │   │   ├── setup.js           # Database setup scripts
+│   │   │   └── index.js           # Infrastructure exports
 │   │   └── tests/
-│   │       └── accountServiceTest.js # Test suite
+│   │       ├── accountServiceTest.js     # Account tests
+│   │       └── infrastructureTest.js     # Infrastructure tests
 │   └── assets/
 │       └── images/
 ├── docs/
-│   └── ACCOUNT_CREATION_FEATURE.md  # Feature documentation
+│   ├── ACCOUNT_CREATION_FEATURE.md  # Feature documentation
+│   └── INFRASTRUCTURE.md             # Infrastructure documentation
 ├── index.html
 ├── package.json
 ├── QUICKSTART.md          # Quick start guide

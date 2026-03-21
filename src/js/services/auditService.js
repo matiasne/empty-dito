@@ -1,7 +1,15 @@
 /**
  * Audit Service
- * Manages audit trail for account operations
+ * Manages audit trail for account operations using infrastructure layer
  */
+
+import { getDatabase } from '../infrastructure/database.js';
+import { Logger } from '../infrastructure/logger.js';
+import { TimeService } from '../infrastructure/timeService.js';
+import { getErrorHandler } from '../infrastructure/errorHandler.js';
+
+const logger = new Logger('AuditService');
+const errorHandler = getErrorHandler();
 
 /**
  * Log an audit entry
@@ -14,8 +22,7 @@
  */
 export async function logAudit(auditEntry) {
   try {
-    // Get existing audit logs
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
+    const db = getDatabase();
 
     // Create audit entry with unique ID
     const entry = {
@@ -23,31 +30,27 @@ export async function logAudit(auditEntry) {
       action: auditEntry.action,
       accountNumber: auditEntry.accountNumber || null,
       details: auditEntry.details || {},
-      timestamp: auditEntry.timestamp || new Date().toISOString(),
+      timestamp: auditEntry.timestamp || TimeService.getCurrentTimestamp(),
       userAgent: navigator.userAgent,
       ipAddress: 'N/A', // In a real system, this would be captured server-side
     };
 
-    // Add to audit logs
-    auditLogs.push(entry);
+    // Insert using infrastructure layer
+    await db.insert('auditLogs', entry);
 
-    // Save to localStorage (keep last 1000 entries)
-    const trimmedLogs = auditLogs.slice(-1000);
-    localStorage.setItem('auditLogs', JSON.stringify(trimmedLogs));
-
-    // Also log to console in development
-    console.log('[AUDIT]', entry);
+    // Log to system logger
+    logger.info(`Audit: ${entry.action}`, {
+      accountNumber: entry.accountNumber,
+      details: entry.details,
+    });
 
     return {
       success: true,
       entry,
     };
   } catch (error) {
-    console.error('Failed to log audit entry:', error);
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to log audit entry', error);
+    return errorHandler.handle(error, 'logAudit');
   }
 }
 
@@ -58,14 +61,15 @@ export async function logAudit(auditEntry) {
  */
 export async function getAuditLogs(accountNumber) {
   try {
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
+    const db = getDatabase();
 
     if (accountNumber) {
-      return auditLogs.filter((log) => log.accountNumber === accountNumber);
+      return await db.query('auditLogs', (log) => log.accountNumber === accountNumber);
     }
 
-    return auditLogs;
+    return await db.query('auditLogs');
   } catch (error) {
+    logger.error('Failed to get audit logs', error);
     return [];
   }
 }
@@ -77,9 +81,11 @@ export async function getAuditLogs(accountNumber) {
  */
 export async function getRecentAuditLogs(limit = 50) {
   try {
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
+    const db = getDatabase();
+    const auditLogs = await db.query('auditLogs');
     return auditLogs.slice(-limit).reverse();
   } catch (error) {
+    logger.error('Failed to get recent audit logs', error);
     return [];
   }
 }
@@ -91,9 +97,10 @@ export async function getRecentAuditLogs(limit = 50) {
  */
 export async function getAuditLogsByAction(action) {
   try {
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
-    return auditLogs.filter((log) => log.action === action);
+    const db = getDatabase();
+    return await db.query('auditLogs', (log) => log.action === action);
   } catch (error) {
+    logger.error('Failed to get audit logs by action', error);
     return [];
   }
 }
@@ -106,12 +113,13 @@ export async function getAuditLogsByAction(action) {
  */
 export async function getAuditLogsByDateRange(startDate, endDate) {
   try {
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
-    return auditLogs.filter((log) => {
+    const db = getDatabase();
+    return await db.query('auditLogs', (log) => {
       const logDate = new Date(log.timestamp);
       return logDate >= new Date(startDate) && logDate <= new Date(endDate);
     });
   } catch (error) {
+    logger.error('Failed to get audit logs by date range', error);
     return [];
   }
 }
@@ -122,15 +130,17 @@ export async function getAuditLogsByDateRange(startDate, endDate) {
  */
 export async function clearAuditLogs() {
   try {
-    localStorage.removeItem('auditLogs');
+    logger.warn('Clearing all audit logs');
+    
+    const db = getDatabase();
+    await db.delete('auditLogs', () => true);
+    
     return {
       success: true,
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
+    logger.error('Failed to clear audit logs', error);
+    return errorHandler.handle(error, 'clearAuditLogs');
   }
 }
 
@@ -161,7 +171,8 @@ export async function exportAuditLogs() {
  */
 export async function getAuditStatistics() {
   try {
-    const auditLogs = JSON.parse(localStorage.getItem('auditLogs') || '[]');
+    const db = getDatabase();
+    const auditLogs = await db.query('auditLogs');
 
     const stats = {
       totalEntries: auditLogs.length,
@@ -197,6 +208,7 @@ export async function getAuditStatistics() {
 
     return stats;
   } catch (error) {
+    logger.error('Failed to get audit statistics', error);
     return {
       totalEntries: 0,
       actionCounts: {},

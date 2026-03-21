@@ -4,26 +4,53 @@
 
 import { initAccountForm } from './components/accountForm.js';
 import { initAccountList } from './components/accountList.js';
+import { initializeInfrastructure, getInfrastructureStatus } from './infrastructure/index.js';
+import { Logger } from './infrastructure/logger.js';
+import './utils/consoleHelpers.js';
+
+const logger = new Logger('Application');
 
 /**
  * Initialize the application
  */
 async function init() {
-  console.log('Bank Account Management System initialized');
+  console.log('Bank Account Management System initializing...');
 
-  // Initialize account creation form
-  initAccountForm();
+  try {
+    // Initialize infrastructure (database, error handling, logging)
+    logger.info('Initializing infrastructure...');
+    const infraResult = await initializeInfrastructure();
+    
+    if (!infraResult.success) {
+      throw new Error('Infrastructure initialization failed: ' + infraResult.error);
+    }
+    
+    logger.info('Infrastructure initialized successfully', infraResult.results);
 
-  // Initialize account list
-  await initAccountList();
+    // Initialize account creation form
+    logger.info('Initializing account form...');
+    initAccountForm();
 
-  // Setup event listeners
-  setupEventListeners();
+    // Initialize account list
+    logger.info('Initializing account list...');
+    await initAccountList();
 
-  // Animate sections on load
-  animateOnLoad();
+    // Setup event listeners
+    setupEventListeners();
 
-  console.log('Application ready');
+    // Animate sections on load
+    animateOnLoad();
+
+    // Log infrastructure status
+    const status = await getInfrastructureStatus();
+    logger.info('Infrastructure status', status.status);
+
+    console.log('✅ Application ready');
+    logger.info('Application initialization complete');
+  } catch (error) {
+    console.error('❌ Application initialization failed:', error);
+    logger.error('Application initialization failed', error);
+  }
 }
 
 /**
